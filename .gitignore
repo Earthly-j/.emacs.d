@@ -1,0 +1,37 @@
+# Skip byte-compiled files
+*.elc
+
+# Skip auto-save files
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+/auto-save-list
+/tramp
+
+# Skip org-mode locks
+.\#*
+
+# Skip network security
+*.gpg
+*.pkcs7
+
+# Skip customizations (optional - comment out if you want to track them)
+# custom.el
+
+# Skip elpa packages (they can be reinstalled)
+/elpa/
+
+# Skip var directory (cache, etc.)
+/var/
+
+# Skip backups
+*.backup
+*.bak
+
+# Skip straight/repos if using straight.el (uncomment if needed)
+# /straight/
+*.onnx
+elpa/
+*.onnx
+elpa/

@@ -1,0 +1,17 @@
+;;;; Emacs Bookmark Format Version 1;;;; -*- coding: utf-8-emacs; mode: lisp-data -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("file_fast_access.el"
+ (filename . "~/.emacs.d/init.el")
+ (front-context-string)
+ (rear-context-string . "eybindings\")\n\n\n\n")
+ (position . 751)
+ (last-modified 27163 61332 503577 0))
+("org-capture-last-stored"
+ (filename . "~/org/red-flags.org")
+ (front-context-string . "* RED FLAG [2026")
+ (rear-context-string)
+ (position . 1)
+ (last-modified 27159 44220 972415 0))
+)

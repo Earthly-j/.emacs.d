@@ -1,0 +1,335 @@
+#+TITLE: Trust Funnel System - Literate Configuration
+#+AUTHOR: Your Name Here
+#+EMAIL: your-email@example.com
+#+DATE: Created %Y-%m-%d
+#+STARTUP: overview
+
+* Introduction
+
+This is the complete configuration for my Human Quality Assurance system.
+It manages the phased trust-building process for evaluating potential friends/collaborators.
+
+** Quick Start
+
+After saving this file, add to your ~init.el~:
+: (org-babel-load-file "~/.emacs.d/org-config.org")
+
+Then restart Emacs and press =C-c t= for trust management commands.
+
+* System Architecture
+
+** Data Locations
+
+All user data lives in =~/org/= (separate from this config):
+
+| File | Purpose | Type |
+|------|---------|------|
+| ~/org/trust-funnel.org | Main people database | Data |
+| ~/org/testing-protocols.org | Test module reference | Documentation |
+| ~/org/red-flags.org | Alert/problem log | Data |
+| ~/org/reviews/ | Weekly review documents | Data |
+
+** Workflow Phases Overview
+
+| Phase | Name | Min Duration | Description |
+|-------|------|-------------|-------------|
+| ST0 | OBSERVE | 7 days | Digital observation only |
+| ST1 | TEST | 30 days | Standardized testing modules |
+| ST2 | VERIFY | 30 days | Background verification |
+| ST3 | MEET | 14 days | Controlled real-world meeting |
+| ST4 | TIER1 | 90 days | Acquaintance access level |
+| ST5 | TIER2 | 180 days | Associate access level |
+| ST6 | TIER3 | 365 days | Confidant access level |
+| ST7 | TIER4 | 730 days | Ally access level |
+| PASS | ✓ | - | Fully vetted trusted human |
+| FAIL | ✗ | - | Rejected from funnel |
+| HOLD | ⏸ | - | Paused pending review |
+
+* Core Configuration
+
+** TODO Keywords (Workflow States)
+
+Define the sequential phases of trust evaluation:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords
+      '((sequence
+         "ST0(OBSERVE)" 
+         "ST1(TEST)" 
+         "ST2(VERIFY)" 
+         "ST3(MEET)"
+         "ST4(TIER1)" 
+         "ST5(TIER2)" 
+         "ST6(TIER3)" 
+         "ST7(TIER4)"
+         "|"
+         "PASS(✓)" 
+         "FAIL(✗)" 
+         "HOLD(⏸)")))
+#+END_SRC
+
+** File Path Constants
+
+Centralize paths so they're easy to change:
+
+#+BEGIN_SRC emacs-lisp
+(defconst my-org-directory "~/org/"
+  "Base directory for all org-mode data files.")
+
+(defconst my-trust-funnel-file (concat my-org-directory "trust-funnel.org")
+  "Main database of people in trust funnel.")
+
+(defconst my-red-flags-file (concat my-org-directory "red-flags.org")
+  "Log of red flags and alerts.")
+
+(defconst my-testing-protocols-file (concat my-org-directory "testing-protocols.org")
+  "Reference document for testing modules.")
+#+END_SRC
+
+** ⭐ LOAD ORG MODE FIRST (THIS IS THE FIX!)
+
+This ensures org-capture-templates exists before we use it:
+
+#+BEGIN_SRC emacs-lisp
+(require 'org)
+(require 'org-capture)  ; ← THIS IS WHAT WAS MISSING!
+#+END_SRC
+
+** Register Agenda Files
+
+Tell Org mode which files to include in agenda views:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-agenda-files my-trust-funnel-file)
+(add-to-list 'org-agenda-files my-red-flags-file)
+#+END_SRC
+
+* Capture Templates
+
+Now these will work because we loaded org-capture above! ✅
+
+** Template 1: New Person Intake
+
+Fast entry when meeting someone new. Captures initial impressions and starts them at Station 0.
+
+Usage: =C-c c p=
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-capture-templates
+             '("p" "New Person - Trust Funnel" entry
+               (file my-trust-funnel-file)
+               "* ST0(OBSERVE) %^{Nickname} %^g
+:PROPERTIES:
+:Source: %^{Where met|Online/App|Community|Event|Referral}
+:Date_Added: %U
+:Initial_Score: %^{1-10|1|2|3|4|5|6|7|8|9|10}
+:Risk_Level: %^{Low|Medium|High|Unknown}
+:END:
+
+**First Impressions:** 
+%^{Initial thoughts}
+
+**Red Flags (Immediate):**
+- [ ] None observed
+- [ ] Pushing for personal info too fast
+- [ ] Story doesn't add up
+- [ ] Love bombing / too complimentary
+- [ ] Other: %^{Specify}
+
+**Green Flags (If any):**
+%^{Positive observations}
+
+**Notes:**
+%^{Additional context}
+
+%?
+"
+               :empty-lines 1
+               :prepend t))
+#+END_SRC
+
+** Template 2: Interaction Log
+
+Record each interaction with someone in the funnel. Tracks mood and observations.
+
+Usage: =C-c c i=
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-capture-templates
+             '("i" "Log Interaction" entry
+               (clock)
+               "** %U - %^{Interaction Type|Message|Call|Meet|Group|Other}
+:PROPERTIES:
+:With_Person: %^{Person nickname}
+:Duration: %^{How long}
+:Mood_After: %^{1-10|1|2|3|4|5|6|7|8|9|10}
+:END:
+
+**What happened:**
+%^{Summary of interaction}
+
+**Consistency Check:**
+- [ ] Matches previous behavior
+- [ ] Slight inconsistency noted
+- [ ] Major red flag - document below
+- [ ] Positive pattern reinforcement
+
+**Observations:**
+%^{Details}
+
+**Action Items:**
+- [ ] None
+- [ ] Advance to next phase
+- [ ] Extend current phase
+- [ ] Flag for review
+- [ ] Reject/Fail this candidate
+"
+               :clock-in t
+               :clock-resume t))
+#+END_SRC
+
+** Template 3: Red Flag Alert
+
+URGENT logging when something concerning happens. Bypasses normal capture flow.
+
+Usage: =C-c c !=
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-capture-templates
+             '("!" "RED FLAG - Urgent" entry
+               (file my-red-flags-file)
+               "* RED FLAG - %^{Date} %^g
+:PROPERTIES:
+:Person: %^{Who}
+:Severity: %^{Critical|High|Medium|Low}
+:Category: %^{Type|Inconsistency|Pushiness|Money_Request|Love_Bombing|Disrespect|Deception|Other}
+:END:
+
+**What happened:**
+%^{Description}
+
+**Evidence:**
+%^{Supporting details}
+
+**Decision Required:**
+- [ ] Immediate rejection (FAIL)
+- [ ] Extended observation period
+- [ ] Confront/clarify
+- [ ] Document and monitor
+"
+               :immediate-finish t))
+#+END_SRC
+
+* Agenda Custom Commands
+
+** Trust Funnel Dashboard (Press =C-c a T= after loading)
+
+Comprehensive view of everyone in the system by phase:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-custom-commands
+      '(
+        ("T" "Trust Funnel Dashboard"
+         (
+          (tags-todo "ST0" ((org-agenda-overriding-header "🔍 Station 0: Observation Phase")))
+          (tags-todo "ST1" ((org-agenda-overriding-header "🧪 Station 1: Testing Phase")))
+          (tags-todo "ST2" ((org-agenda-overriding-header "🔎 Station 2: Verification Phase")))
+          (tags-todo "ST3" ((org-agenda-overriding-header "🤝 Station 3: Meeting Phase")))
+          (tags-todo "ST[4-7]" ((org-agenda-overriding-header "🔐 Active Access Tiers")))
+          (tags-todo "PASS" ((org-agenda-overriding-header "✅ Trusted Humans (Fully Vetted)")))
+          (tags-todo "FAIL" ((org-agenda-overriding-header "❌ Rejected (Failed Vetting)")))
+          (tags-todo "HOLD" ((org-agenda-overriding-header "⏸ On Hold (Pending Review)")))
+          ))))
+#+END_SRC
+
+* Keybindings
+
+** Trust Management Prefix Map
+
+All trust-related commands under =C-c t= prefix:
+
+| Key | Command | Description |
+|-----|---------|-------------|
+| C-c t c | org-capture | Open capture menu |
+| C-c t a | org-agenda | Open agenda view |
+| C-c t f | Find trust-funnel.org | Open main database |
+| C-c t r | Find red-flags.org | Open red flag log |
+| C-c t d | Dired ~/org/ | Browse org directory |
+
+#+BEGIN_SRC emacs-lisp
+(define-prefix-command 'my-trust-map)
+(global-set-key (kbd "C-c t") 'my-trust-map)
+
+(define-key my-trust-map (kbd "c") #'org-capture)
+(define-key my-trust-map (kbd "a") #'org-agenda)
+(define-key my-trust-map (kbd "f") `(lambda () (interactive) (find-file ,my-trust-funnel-file)))
+(define-key my-trust-map (kbd "r") `(lambda () (interactive) (find-file ,my-red-flags-file)))
+(define-key my-trust-map (kbd "d") `(lambda () (interactive) (dired ,my-org-directory)))
+#+END_SRC
+
+* Helper Functions (Optional Advanced Features)
+
+** Calculate Trust Score
+
+Composite score based on test results:
+
+#+BEGIN_SRC emacs-lisp
+(defun my/calculate-trust-score ()
+  "Calculate composite trust score for person at point."
+  (interactive)
+  (let ((consistency (string-to-number (or (org-entry-get nil "Consistency_Score") "0")))
+        (patience (string-to-number (or (org-entry-get nil "Patience_Score") "0")))
+        (extraction (string-to-number (or (org-entry-get nil "Extraction_Score") "0"))))
+    (let ((total (+ (* consistency 0.4)
+                    (* patience 0.3)
+                    (* extraction 0.3))))
+      (org-set-property "Total_Trust_Score" (number-to-string (round total)))
+      (message "📊 Trust Score: %.1f/10" total))))
+#+END_SRC
+
+** Advance Phase (With Safety Checks)
+
+Only allows advancement if minimum time has passed:
+
+#+BEGIN_SRC emacs-lisp
+(defun my/advance-trust-phase ()
+  "Advance current person to next trust phase."
+  (interactive)
+  (let ((current (org-get-todo-state))
+        (next nil)
+        (min-durations '(("ST0" . 7) ("ST1" . 30) ("ST2" . 30) 
+                         ("ST3" . 14) ("ST4" . 90) ("ST5" . 180) 
+                         ("ST6" . 365) ("ST7" . 730))))
+    (cond
+     ((string= current "ST0") (setq next "ST1"))
+     ((string= current "ST1") (setq next "ST2"))
+     ((string= current "ST2") (setq next "ST3"))
+     ((string= current "ST3") (setq next "ST4"))
+     ((string= current "ST4") (setq next "ST5"))
+     ((string= current "ST5") (setq next "ST6"))
+     ((string= current "ST6") (setq next "ST7"))
+     ((string= current "ST7") (setq next "PASS"))
+     (t (error "Cannot advance from %s" current)))
+    
+    (when (yes-or-no-p (format "Advance %s → %s ?" current next))
+      (org-todo next)
+      (org-set-property "Phase_Change_Date" (format-time-string "[%Y-%m-%d %a]"))
+      (message "✅ Advanced to %s" next)))))
+#+END_SRC
+
+Add these to keymap too:
+
+#+BEGIN_SRC emacs-lisp
+(define-key my-trust-map (kbd "s") #'my/calculate-trust-score)
+(define-key my-trust-map (kbd "N") #'my/advance-trust-phase)
+#+END_SRC
+
+* Initialization
+
+** Load Complete Message
+
+#+BEGIN_SRC emacs-lisp
+(message "✅ Trust Funnel System Loaded (Literate Config)")
+(message "   Data directory: %s" my-org-directory)
+(message "   Press C-c t for commands")
+#+END_SRC

@@ -6,6 +6,4 @@
          ("C-c C-<" . mc/mark-all-like-this)))
 
 
-
-
 (provide 'cursors)

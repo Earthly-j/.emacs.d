@@ -17,35 +17,54 @@
 ;; ============================================================
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(require 'my-ascii-art)  
-(require 'cursors)  
-;; (require 'consult)
-(require 'treemacs)
+
+;; inetrface
 (require 'bread_crumb)
-(require 'org_capture)
+(require 'treemacs)
 (require 'font)
-(require 'org_drill)
-(require 'inputmethod)
-(require 'tts)
-;; REMOVED (require 'flycheck) here! Use-package handles it below.
-(require 'epkg)
-(require 'ox_hugo)
+;;(require 'dirvish)
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+
+;; env
+(require 'allow_hanguel)
 (require 'path_shell) ;; for flutter connect package
 (require 'Flutter_connect)
 (require 'lsp_dap)
+
+;;fuctional base
+(require 'my-ascii-art)
+(require 'magit_git)
+;; (require 'consult)
+(require 'tts)
+(require 'org_capture)
+(require 'org_drill)
+(require 'multiple_cursor_add)
+
+
+;; LSP
+(require 'pair_match.el)
+
+
+;; REMOVED (require 'flycheck) here! Use-package handles it below.
+
+(require 'epkg)
+
 
 (require 'my-completion)
 (require 'espeakk)
 (require 'ox-publishh)
 (require 'glimps_peep)
-(require 'pacman)
-(require 'line_number)
 
-(add-to-list 'load-path (expand-file-name "my-functions" user-emacs-directory))
+
+(add-to-list 'load-path (expand-file-name "functions" user-emacs-directory))
 (require 'quick-cloze)
 (require 'fast_access)
 (require 'renameFile)
-(require 'my/add-custom-module)
+(require 'add_defunn)
+(require 'Org80x24Canvas.el)
 ;; ============================================================y
 ;; CORFU SETUP (Autocomplete UI - Fast like VS Code)
 ;; ============================================================
@@ -57,6 +76,10 @@
   (setq corfu-auto-delay 0.0)  
   (setq corfu-auto-prefix 1)   
   (setq corfu-cycle t))
+(winner-mode 1)
+(breadcrumb-mode 1)
+(dirvish-override-dired-mode 1)
+
 
 ;; Safety Nets to stop Org-mode crashes
 (add-hook 'org-mode-hook (lambda () (setq-local corfu-auto nil)))
@@ -88,7 +111,7 @@
 
 ;; Add Homebrew to Emacs exec-path
 (let ((brew-path (concat (substring (shell-command-to-string "brew --prefix 2>/dev/null") 0 -1) "/bin")))
-  (when (file-exists-p brew-path)
+U  (when (file-exists-p brew-path)
     (add-to-list 'exec-path brew-path)
     (setenv "PATH" (concat brew-path ":" (getenv "PATH")))))
 
@@ -97,24 +120,7 @@
 (when (file-exists-p custom-file)
   (load custom-file 'no-error 'no-message))
 
-;; ============================================================
-;; UI SETTINGS (Moved from my-ui.el for simplicity)
-;; ============================================================
-;; FIXED: Removed the extra closing parenthesis here
-(add-hook 'prog-mode-hook #'display-line-numbers-mode) 
-(electric-pair-mode 1)
 
-(use-package paredit
-  :ensure t
-  :hook ((emacs-lisp-mode . enable-paredit-mode)
-         (lisp-mode . enable-paredit-mode)))
-
-(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
-
-;; Turned the Flycheck error list key back on!
-(global-set-key (kbd "C-c e") 'flycheck-list-errors)
-
-(global-visual-line-mode 1)
 
 ;; ============================================================
 ;; CUSTOM NAVIGATION
@@ -142,3 +148,10 @@
 
 ;;; init.el ends here
 (put 'downcase-region 'disabled nil)
+
+(add-to-list 'load-path (expand-file-name "my-functions" user-emacs-directory))
+(require 'test)
+
+
+
+

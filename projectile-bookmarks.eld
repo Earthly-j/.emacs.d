@@ -1,1 +1,1 @@
-("~/" "~/.emacs.d/" "~/.config/karabiner/")
+("~/.emacs.d/" "~/" "~/.config/karabiner/")

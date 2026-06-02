@@ -1,4 +1,3 @@
-
 ;; ============================================================
 ;; BOOTSTRAP
 ;; ============================================================
@@ -23,9 +22,7 @@
 (require 'treemacs)
 (require 'font)
 ;;(require 'dirvish)
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+
 
 
 ;; env
@@ -45,7 +42,7 @@
 
 
 ;; LSP
-(require 'pair_match.el)
+;;(require 'pair_match)
 
 
 ;; REMOVED (require 'flycheck) here! Use-package handles it below.
@@ -63,8 +60,8 @@
 (require 'quick-cloze)
 (require 'fast_access)
 (require 'renameFile)
-(require 'add_defunn)
-(require 'Org80x24Canvas.el)
+;;(require 'add_defunn)
+(require 'Org80x24Canvas)
 ;; ============================================================y
 ;; CORFU SETUP (Autocomplete UI - Fast like VS Code)
 ;; ============================================================
@@ -111,7 +108,7 @@
 
 ;; Add Homebrew to Emacs exec-path
 (let ((brew-path (concat (substring (shell-command-to-string "brew --prefix 2>/dev/null") 0 -1) "/bin")))
-U  (when (file-exists-p brew-path)
+  (when (file-exists-p brew-path)
     (add-to-list 'exec-path brew-path)
     (setenv "PATH" (concat brew-path ":" (getenv "PATH")))))
 
@@ -150,8 +147,6 @@ U  (when (file-exists-p brew-path)
 (put 'downcase-region 'disabled nil)
 
 (add-to-list 'load-path (expand-file-name "my-functions" user-emacs-directory))
-(require 'test)
-
 
 
 
